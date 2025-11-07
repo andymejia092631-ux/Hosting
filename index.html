@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>plantilla de planificacion</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body>
+  <div class="background"></div>
+
+  <!-- Botón de ayuda arriba a la derecha -->
+  <div class="help-button" id="helpBtn">
+    <i class='bx bx-help-circle'></i>
+  </div>
+
+  <div class="container">
+    <h1>Ana Elizabeth Delgado Chireno</h1>
+    <p class="subtitle">ELIGE UNA CATEGORÍA</p>
+
+    <div class="categories">
+      <a href="impresoras.html" class="category">
+        <i class='bx bx-printer'></i>
+        <span>Impresoras</span>
+      </a>
+
+      <a href="monitores.html" class="category">
+        <i class='bx bx-calculator'></i>
+        <span>Calculadora</span>
+      </a>
+
+      
+      <a href="auriculares.html" class="category">
+        <i class='bx bx-headphone'></i>
+        <span>Auriculares</span>
+      </a>
+
+      <a href="almacenamiento.html" class="category">
+        <i class='bx bx-cloud'></i>
+        <span>Almacenamiento</span>
+      </a>
+
+      <a href="procesadores.html" class="category">
+        <i class='bx bx-chip'></i>
+        <span>Procesadores</span>
+      </a>
+
+      <a href="ratones.html" class="category">
+        <i class='bx bx-mouse'></i>
+        <span>Ratones</span>
+      </a>
+    </div>
+
+   
+  </div>
+
+  <!-- Modal de ayuda -->
+  <div class="modal" id="helpModal">
+    <div class="modal-content">
+      <span class="close" id="closeModal">&times;</span>
+      <h2>Instrucciones</h2>
+      <p>
+        Bienvenido a <strong>TU PAJINA WED PROPIA</strong>.  
+        Aquí puedes mejoral ala ora de trabajar en tus planificasion:
+      </p>
+      <ul>
+        <li>Haz clic en una categoría (como <b>Impresoras</b> o <b>Monitores</b>) para acceder a los productos disponibles.</li>
+        <li>Usa los iconos de redes sociales en la parte inferior para seguirnos.</li>
+        <li>Haz clic en este icono <i class='bx bx-help-circle'></i> para volver a leer estas instrucciones.</li>
+      </ul>
+      <p>Explora y disfruta de nuestra experiencia moderna y sencilla 🚀</p>
+    </div>
+  </div>
+
+  <script>
+    const helpBtn = document.getElementById('helpBtn');
+    const helpModal = document.getElementById('helpModal');
+    const closeModal = document.getElementById('closeModal');
+
+    helpBtn.onclick = () => helpModal.style.display = 'flex';
+    closeModal.onclick = () => helpModal.style.display = 'none';
+    window.onclick = (e) => { if (e.target === helpModal) helpModal.style.display = 'none'; };
+  </script>
+</body>
+</html>
