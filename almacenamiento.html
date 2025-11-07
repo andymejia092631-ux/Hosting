@@ -4,9 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nube Personal - Almacenamiento</title>
-  <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+    :root {
+      --color-bg: rgba(255, 255, 255, 0.08);
+      --color-highlight: #00bfff;
+      --color-text: #fff;
+      --color-hover: rgba(0,191,255,0.4);
+      --color-overlay: rgba(0, 0, 0, 0.7);
+      --radius: 10px;
+      --transition: 0.3s ease;
+    }
 
     * {
       margin: 0;
@@ -16,40 +27,45 @@
     }
 
     body {
-      height: 100vh;
-      background: url('fondo.png') no-repeat center center/cover;
-      color: white;
+      min-height: 100vh;
+      background: url('fondo.png') center/cover no-repeat;
+      color: var(--color-text);
       display: flex;
       align-items: center;
       justify-content: center;
+      position: relative;
+      padding: 1rem;
     }
 
     body::before {
       content: "";
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.7);
+      inset: 0;
+      background: var(--color-overlay);
       z-index: -1;
     }
 
     .container {
-      background: rgba(255,255,255,0.08);
+      background: var(--color-bg);
       backdrop-filter: blur(15px);
-      padding: 30px 40px;
+      padding: 2rem;
       border-radius: 20px;
       text-align: center;
-      width: 95%;
+      width: 100%;
       max-width: 900px;
-      box-shadow: 0 0 25px rgba(0,0,0,0.5);
+      box-shadow: 0 0 25px rgba(0,0,0,0.4);
       overflow: hidden;
+      animation: fadeIn 0.6s ease;
     }
 
-    h1 {
-      font-size: 1.9rem;
-      margin-bottom: 15px;
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    header h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
     }
 
     .upload-section {
@@ -58,30 +74,34 @@
       justify-content: center;
       align-items: center;
       gap: 10px;
-      margin-bottom: 15px;
+      margin-bottom: 1rem;
     }
 
     input[type="file"] {
-      color: white;
+      color: var(--color-text);
       background: rgba(255,255,255,0.1);
-      border-radius: 8px;
-      padding: 5px;
+      border-radius: var(--radius);
+      padding: 8px;
     }
 
     button {
       background: rgba(255,255,255,0.1);
       border: none;
       padding: 10px 20px;
-      border-radius: 8px;
-      color: white;
-      font-weight: bold;
+      border-radius: var(--radius);
+      color: var(--color-text);
+      font-weight: 600;
       cursor: pointer;
-      transition: 0.3s;
+      transition: var(--transition);
     }
 
     button:hover {
-      background: rgba(0,191,255,0.4);
+      background: var(--color-hover);
       transform: scale(1.05);
+    }
+
+    .export-btn {
+      background: rgba(0,191,255,0.3);
     }
 
     .search-bar {
@@ -95,11 +115,11 @@
     .search-bar input {
       width: 70%;
       padding: 10px;
-      border-radius: 8px;
+      border-radius: var(--radius);
       border: none;
       outline: none;
       background: rgba(255,255,255,0.15);
-      color: white;
+      color: var(--color-text);
       text-align: center;
       font-size: 1rem;
     }
@@ -108,7 +128,7 @@
       margin-top: 25px;
       background: rgba(255,255,255,0.05);
       padding: 15px;
-      border-radius: 10px;
+      border-radius: var(--radius);
       max-height: 350px;
       overflow-y: auto;
       text-align: left;
@@ -121,19 +141,14 @@
       padding: 15px 20px;
       background: rgba(255,255,255,0.12);
       margin-bottom: 10px;
-      border-radius: 10px;
-      transition: 0.3s;
+      border-radius: var(--radius);
+      transition: var(--transition);
       font-size: 1rem;
     }
 
     .file-item:hover {
       background: rgba(0,191,255,0.25);
       transform: scale(1.01);
-    }
-
-    .file-info {
-      display: flex;
-      flex-direction: column;
     }
 
     .file-info small {
@@ -145,52 +160,83 @@
       font-size: 22px;
       margin-left: 10px;
       cursor: pointer;
-      transition: 0.3s;
+      transition: var(--transition);
     }
 
     .actions i:hover {
-      color: #00bfff;
+      color: var(--color-highlight);
       transform: scale(1.2);
     }
 
     .back {
       display: inline-block;
       margin-top: 15px;
-      color: white;
+      color: var(--color-text);
       text-decoration: none;
+      transition: var(--transition);
     }
 
     .back:hover {
-      color: #00bfff;
+      color: var(--color-highlight);
     }
 
-    .export-btn {
-      margin-top: 15px;
-      background: rgba(0,191,255,0.3);
+    @media (max-width: 600px) {
+      .search-bar input {
+        width: 90%;
+      }
+      button {
+        width: 100%;
+      }
+    }
+
+    /* Pequeño toast de mensaje */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.4s;
+      z-index: 999;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
     }
   </style>
 </head>
+
 <body>
   <div class="container">
-    <h1><i class='bx bx-folder'></i> Nube Personal de Documentos</h1>
+    <header>
+      <h1><i class='bx bx-folder'></i> Nube Personal de Documentos</h1>
+    </header>
 
-    <div class="upload-section">
-      <input type="file" id="fileInput" multiple>
-      <button id="saveBtn"><i class='bx bx-upload'></i> Guardar Archivos</button>
-      <button id="exportBtn" class="export-btn"><i class='bx bx-export'></i> Exportar Todo</button>
-    </div>
+    <section class="upload-section">
+      <input type="file" id="fileInput" multiple aria-label="Seleccionar archivos">
+      <button id="saveBtn"><i class='bx bx-upload'></i> Guardar</button>
+      <button id="exportBtn" class="export-btn"><i class='bx bx-export'></i> Exportar</button>
+    </section>
 
     <div class="search-bar">
-      <input type="text" id="searchInput" placeholder="Buscar documento...">
+      <input type="text" id="searchInput" placeholder="Buscar documento..." aria-label="Buscar documentos">
       <i class='bx bx-search'></i>
     </div>
 
-    <div class="file-list" id="fileList">
+    <main class="file-list" id="fileList">
       <p style="text-align:center; opacity:0.7;">No hay documentos guardados</p>
-    </div>
+    </main>
 
-    <a href="index.html" class="back"><i class='bx bx-arrow-back'></i> Volver al inicio</a>
+    <footer>
+      <a href="index.html" class="back"><i class='bx bx-arrow-back'></i> Volver al inicio</a>
+    </footer>
   </div>
+
+  <div class="toast" id="toast"></div>
 
   <script>
     const fileInput = document.getElementById('fileInput');
@@ -198,13 +244,20 @@
     const exportBtn = document.getElementById('exportBtn');
     const fileList = document.getElementById('fileList');
     const searchInput = document.getElementById('searchInput');
+    const toast = document.getElementById('toast');
 
     let storedFiles = JSON.parse(localStorage.getItem('documentosGuardados')) || [];
 
-    function renderFiles(filter = "") {
+    const showToast = (msg) => {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    };
+
+    const renderFiles = (filter = "") => {
       fileList.innerHTML = "";
       const filtered = storedFiles.filter(f => f.name.toLowerCase().includes(filter.toLowerCase()));
-      if (filtered.length === 0) {
+      if (!filtered.length) {
         fileList.innerHTML = "<p style='text-align:center; opacity:0.7;'>No se encontraron documentos</p>";
         return;
       }
@@ -217,65 +270,65 @@
             <small>${file.date} — ${file.size}</small>
           </div>
           <div class="actions">
-            <i class='bx bx-download' title="Descargar" onclick="downloadFile(${index})"></i>
-            <i class='bx bx-trash' title="Eliminar" onclick="deleteFile(${index})"></i>
-          </div>
-        `;
+            <i class='bx bx-download' title="Descargar" role="button" onclick="downloadFile(${index})"></i>
+            <i class='bx bx-trash' title="Eliminar" role="button" onclick="deleteFile(${index})"></i>
+          </div>`;
         fileList.appendChild(item);
       });
-    }
+    };
 
-    saveBtn.addEventListener('click', () => {
+    const saveFiles = () => {
       const files = fileInput.files;
-      if (files.length === 0) {
-        alert("Selecciona al menos un archivo");
-        return;
-      }
+      if (!files.length) return showToast("Selecciona al menos un archivo");
 
-      for (let file of files) {
+      Array.from(files).forEach(file => {
         const reader = new FileReader();
-        reader.onload = function(e) {
-          const date = new Date().toLocaleString();
-          const size = (file.size / 1024).toFixed(1) + " KB";
-          storedFiles.push({ name: file.name, data: e.target.result, date, size });
+        reader.onload = e => {
+          storedFiles.push({
+            name: file.name,
+            data: e.target.result,
+            date: new Date().toLocaleString(),
+            size: (file.size / 1024).toFixed(1) + " KB"
+          });
           localStorage.setItem('documentosGuardados', JSON.stringify(storedFiles));
           renderFiles();
+          showToast(`Archivo "${file.name}" guardado`);
         };
         reader.readAsDataURL(file);
-      }
+      });
 
       fileInput.value = "";
-    });
+    };
 
-    function downloadFile(index) {
+    const downloadFile = index => {
       const file = storedFiles[index];
       const link = document.createElement('a');
       link.href = file.data;
       link.download = file.name;
       link.click();
-    }
+    };
 
-    function deleteFile(index) {
-      if (confirm("¿Seguro que deseas eliminar este documento?")) {
-        storedFiles.splice(index, 1);
+    const deleteFile = index => {
+      if (confirm("¿Eliminar este documento?")) {
+        const [removed] = storedFiles.splice(index, 1);
         localStorage.setItem('documentosGuardados', JSON.stringify(storedFiles));
         renderFiles(searchInput.value);
+        showToast(`"${removed.name}" eliminado`);
       }
-    }
+    };
 
-    exportBtn.addEventListener('click', () => {
-      if (storedFiles.length === 0) {
-        alert("No hay documentos para exportar");
-        return;
-      }
-      const zipData = JSON.stringify(storedFiles);
-      const blob = new Blob([zipData], { type: "application/json" });
+    const exportFiles = () => {
+      if (!storedFiles.length) return showToast("No hay documentos para exportar");
+      const blob = new Blob([JSON.stringify(storedFiles)], { type: "application/json" });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
       link.download = "respaldo_documentos.json";
       link.click();
-    });
+      showToast("Respaldo exportado correctamente");
+    };
 
+    saveBtn.addEventListener('click', saveFiles);
+    exportBtn.addEventListener('click', exportFiles);
     searchInput.addEventListener('input', () => renderFiles(searchInput.value));
 
     renderFiles();
