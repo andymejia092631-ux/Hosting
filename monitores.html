@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora Inteligente Yane 3.0</title>
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+    * {margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif;}
+    body {
+      height:100vh; display:flex; align-items:center; justify-content:center;
+      color:white; overflow:hidden; background:url('fondo.png') no-repeat center center/cover;
+      position:relative;
+    }
+    body::before {
+      content:""; position:absolute; top:0; left:0; width:100%; height:100%;
+      background:rgba(0,0,0,0.7); z-index:-1;
+    }
+    .calc-container {
+      background:rgba(255,255,255,0.08); backdrop-filter:blur(15px);
+      padding:30px 40px; border-radius:20px; text-align:center; max-width:480px; width:90%;
+      box-shadow:0 0 25px rgba(0,0,0,0.5);
+      position:relative;
+    }
+    h1 {margin-bottom:15px; font-size:1.6rem;}
+    textarea {
+      width:100%; height:100px; border-radius:10px; border:none; outline:none; resize:none;
+      padding:10px; background:rgba(255,255,255,0.15); color:white; font-size:1rem; margin-bottom:15px;
+    }
+    textarea.invalid {border:2px solid red; background:rgba(255,0,0,0.1);}
+    .buttons {display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:15px;}
+    button {
+      background:rgba(255,255,255,0.1); border:none; padding:10px 16px; border-radius:8px;
+      color:white; font-weight:bold; cursor:pointer; transition:0.2s;
+    }
+    button:hover {background:rgba(0,191,255,0.4); transform:scale(1.05);}
+    #micBtn.listening {background:red !important; box-shadow:0 0 10px red;}
+    #result {
+      margin-top:15px; font-size:1.2rem; padding:10px; background:rgba(255,255,255,0.1);
+      border-radius:8px; min-height:40px;
+    }
+    .percent-section {margin-top:15px; display:flex; justify-content:center; align-items:center; gap:10px;}
+    .percent-section input {
+      width:80px; padding:6px; border-radius:8px; border:none; outline:none;
+      background:rgba(255,255,255,0.15); color:white; text-align:center;
+    }
+    #yane-status {
+      margin-top:10px; font-size:0.9rem;
+      background:rgba(0,191,255,0.1); padding:8px;
+      border-radius:8px; text-align:center; border:1px solid rgba(0,191,255,0.3);
+    }
+    #mic-visual {
+      width:100%; height:10px; background:rgba(255,255,255,0.1);
+      border-radius:5px; overflow:hidden; margin-top:8px;
+    }
+    #mic-bar {
+      width:0%; height:100%;
+      background:linear-gradient(90deg,#00bfff,#00ff9d);
+      transition:width 0.1s linear;
+    }
+    a.back {display:inline-block; color:white; text-decoration:none; margin-top:15px; opacity:0.9;}
+    a.back:hover {color:#00bfff;}
+  </style>
+</head>
+<body>
+  <div class="calc-container">
+    <h1>🤖 Calculadora Inteligente Yane 3.0</h1>
+    <textarea id="numbers" placeholder="Ejemplo: Yane suma 10, 20, 30 y divídelo por 3"></textarea>
+
+    <div class="buttons">
+      <button id="sumBtn">Sumar</button>
+      <button id="resBtn">Restar</button>
+      <button id="prodBtn">Multiplicar</button>
+      <button id="divBtn">Dividir</button>
+      <button id="clearBtn">Limpiar</button>
+    </div>
+
+    <div class="percent-section">
+      <label for="percent">Porcentaje:</label>
+      <input type="number" id="percent" placeholder="Ej: 3" min="0" max="100"> %
+      <button id="applyPercent">Aplicar %</button>
+    </div>
+
+    <button id="micBtn">🎤 Hablar con Yane</button>
+
+    <div id="result">Resultado: -</div>
+    <div id="yane-status">Estado: 💤 Esperando orden...</div>
+    <div id="mic-visual"><div id="mic-bar"></div></div>
+
+    <a class="back" href="index.html"><i class='bx bx-arrow-back'></i> Volver al inicio</a>
+  </div>
+
+  <script>
+    const numbersEl=document.getElementById('numbers');
+    const resultEl=document.getElementById('result');
+    const statusEl=document.getElementById('yane-status');
+    const micBar=document.getElementById('mic-bar');
+    const micBtn=document.getElementById("micBtn");
+    let lastResult=0;
+
+    function updateStatus(msg,emoji="💭"){statusEl.textContent=`Estado: ${emoji} ${msg}`;}
+    function speak(t){const u=new SpeechSynthesisUtterance(t);u.lang="es-ES";window.speechSynthesis.speak(u);}
+    function showError(m){resultEl.textContent=`⚠️ Error: ${m}`;updateStatus(`⚠️ ${m}`,"⚠️");speak(m);micBtn.classList.remove("listening");}
+
+    // === IA Yane: todas las operaciones ===
+    function parseCommand(text) {
+      updateStatus("🧠 Analizando tu orden...", "🤔");
+      text = text.toLowerCase()
+        .replace(/yane|por\s*favor|haz|realiza|calcula|operación/gi, "")
+        .replace(/,/g, " ")
+        .replace(/(\d+)\s*(punto)\s*(\d+)/g, "$1.$3")
+        .replace(/(uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez)/gi, m=>{
+          const map={uno:1,dos:2,tres:3,cuatro:4,cinco:5,seis:6,siete:7,ocho:8,nueve:9,diez:10};
+          return map[m.toLowerCase()] ?? m;
+        })
+        .replace(/ +/g, " ");
+
+      const nums = text.match(/\d+(\.\d+)?/g)?.map(Number) || [];
+      if (!nums.length) return showError("No detecté números separados correctamente.");
+
+      let resultado, accion;
+
+      if (text.includes("multiplica") || text.includes("producto") || text.includes("por")) {
+        resultado = nums.reduce((a,b)=>a*b,1);
+        accion = "multiplicación";
+      } 
+      else if (text.includes("resta") || text.includes("menos")) {
+        resultado = nums.reduce((a,b)=>a-b);
+        accion = "resta";
+      }
+      else if (text.includes("divide") || text.includes("división") || text.includes("entre")) {
+        if (nums.length < 2) return showError("Necesito al menos dos números para dividir.");
+        resultado = nums.reduce((a,b)=>a/b);
+        accion = "división";
+      }
+      else if (text.includes("promedio") || text.includes("media")) {
+        resultado = nums.reduce((a,b)=>a+b,0)/nums.length;
+        accion = "promedio";
+      }
+      else {
+        resultado = nums.reduce((a,b)=>a+b,0);
+        accion = "suma";
+      }
+
+      // Operación encadenada: división o porcentaje
+      const dividirMatch = text.match(/divid(e|ir|elo|entre)?\s*(por)?\s*(\d+(\.\d+)?)/);
+      if (dividirMatch) {
+        const divisor=parseFloat(dividirMatch[3]);
+        if(!isNaN(divisor)&&divisor!==0){
+          resultado/=divisor;
+          accion+=` y división entre ${divisor}`;
+        }
+      }
+
+      const porcentajeMatch = text.match(/(porcentaje|por ciento)\s*(de|del)?\s*(\d+(\.\d+)?)/);
+      if (porcentajeMatch) {
+        const porc=parseFloat(porcentajeMatch[3]);
+        if(!isNaN(porc)){
+          resultado = resultado * (porc / 100);
+          accion += ` y ${porc}% aplicado`;
+        }
+      }
+
+      const mensaje = `El resultado de la ${accion} es ${resultado}`;
+      resultEl.textContent = mensaje;
+      speak(mensaje);
+      updateStatus("✅ Cálculo completado", "✅");
+      micBtn.classList.remove("listening");
+    }
+
+    // === Reconocimiento de voz + medidor ===
+    let recognition,audioContext,analyser,micStream;
+    async function initMicMeter(){
+      try{
+        micStream=await navigator.mediaDevices.getUserMedia({audio:true});
+        audioContext=new AudioContext();
+        const source=audioContext.createMediaStreamSource(micStream);
+        analyser=audioContext.createAnalyser();
+        analyser.fftSize=256;
+        const data=new Uint8Array(analyser.frequencyBinCount);
+        source.connect(analyser);
+        function update(){
+          analyser.getByteFrequencyData(data);
+          const vol=data.reduce((a,b)=>a+b,0)/data.length;
+          micBar.style.width=Math.min(100,vol/2)+"%";
+          requestAnimationFrame(update);
+        }
+        update();
+      }catch(e){showError("No se pudo acceder al micrófono. Permite el acceso en el navegador.");}
+    }
+
+    try{
+      recognition=new(window.SpeechRecognition||window.webkitSpeechRecognition)();
+      recognition.lang="es-ES"; recognition.continuous=false; recognition.interimResults=false;
+      recognition.onstart=()=>{window.speechSynthesis.cancel();}
+      micBtn.onclick=()=>{micBtn.classList.add("listening");updateStatus("🎤 Escuchando...","🎤");recognition.start();initMicMeter();}
+      recognition.onresult=(e)=>{let text=e.results[0][0].transcript.trim();if(text.length<3)return showError("No entendí tu voz.");numbersEl.value=text;parseCommand(text);}
+      recognition.onerror=(e)=>{console.error(e);let msg="No pude escucharte.";if(e.error==="no-speech")msg="No detecté voz.";if(e.error==="audio-capture")msg="No hay micrófono o permisos.";if(e.error==="not-allowed")msg="Permite el micrófono.";showError(msg);}
+      recognition.onend=()=>{updateStatus("💤 Esperando orden...","💤");micBtn.classList.remove("listening");};
+    }catch(err){showError("Tu navegador no soporta voz. Usa Chrome o Edge.");}
+
+    // === Botones manuales ===
+    sumBtn.onclick=()=>{const n=parseNumbers();if(!n.length)return showError("Verifica los números.");showManual("suma",n.reduce((a,b)=>a+b,0));}
+    resBtn.onclick=()=>{const n=parseNumbers();if(!n.length)return showError("Verifica los números.");showManual("resta",n.reduce((a,b)=>a-b));}
+    prodBtn.onclick=()=>{const n=parseNumbers();if(!n.length)return showError("Verifica los números.");showManual("multiplicación",n.reduce((a,b)=>a*b,1));}
+    divBtn.onclick=()=>{const n=parseNumbers();if(!n.length)return showError("Verifica los números.");showManual("división",n.reduce((a,b)=>a/b));}
+    clearBtn.onclick=()=>{numbersEl.value='';resultEl.textContent='Resultado: -';updateStatus("🧹 Campo limpiado","🧹");}
+    applyPercent.onclick=()=>{const p=parseFloat(percent.value);if(isNaN(p)||p===0)return showError('Porcentaje inválido');showManual(`Resultado ÷ ${p}%`,(lastResult/(p/100)).toFixed(2));}
+
+    function parseNumbers(){
+      const t=numbersEl.value.trim();const p=t.split(/[,\\s]+/).filter(Boolean);
+      const n=p.map(x=>parseFloat(x));const v=n.every(x=>!isNaN(x));
+      numbersEl.classList.toggle('invalid',!v&&n.length>0);return v?n:[];
+    }
+
+    function showManual(op,res){resultEl.textContent=`${op}: ${res}`;lastResult=res;speak(`El resultado de ${op} es ${res}`);}
+  </script>
+</body>
+</html>
